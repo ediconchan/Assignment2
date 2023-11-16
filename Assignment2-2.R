@@ -21,11 +21,11 @@ Squamata18S_search
 Squamata18S_search <- entrez_search(db = "nuccore", term = "Squamata[ORGN] AND 18S rRNA AND biomol_rRNA[PROP]", retmax = 498, use_history = T)
 
 #Summary of NCBI Squamata hits acquired
-Squamata18S_summ <- entrez_summary(db = "nuccore", web_history =Squamata18S_search$web_history)
+Squamata18S_summ <- entrez_summary(db = "nuccore", web_history =Squamata18S_search$web_history, retmode = "xml")
 
 #Checking the number of unique species in the summary
-unique(extract_from_esummary(Squamata18S_summ, "organism"))
-Sq18Stable <- table(extract_from_esummary(Squamata18S_summ, "organism"))
+unique(extract_from_esummary(Squamata18S_summ, "Organism"))
+Sq18Stable <- table(extract_from_esummary(Squamata18S_summ, "Organism"))
 Sq18Stable
 
 # Turning the species count table into a dataframe and plotting a frequency bar chart for the species
