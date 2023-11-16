@@ -249,6 +249,24 @@ preProcess_ATGprop <- preProcess(dfTraining[,c("Aprop","Tprop", "Gprop")], metho
 dfATprop_norm <- predict(preProcess_ATGprop, newdata = dfTraining)
 featurePlot(x= dfATprop_norm[,c("Aprop","Tprop", "Gprop")], y = factor(dfTraining_ATprop$markercode), plot = "box", labels = c("",""))
 
+
+## EDIT: I want to improve this box-whisker plot, add labels and make the colouring of the plot more accessible. 
+
+##Adding package to manipulate data frame to make plotting easier
+library(reshape2)
+library(viridis)
+
+## "Melting" data frame into long-format data to be able to access the x and y variables easier
+dfMeltDimer <- melt(dfDimer_norm, id.vars = ("markercode"))
+
+##plotting using melted variables, adding colour and labels, making viewing and reading the plot easier
+plot <- ggplot(data = dfMeltDimer, aes(x= markercode, y = value)) + geom_boxplot(aes(fill= markercode)) +theme_bw() + facet_wrap(~ variable, scales = "free") + geom_point(aes(y=value, group=markercode), position = position_dodge(0.9)) + scale_fill_viridis_d(option = "D", direction = -1) + labs(title = "Importance of Predictor Dimers", x= "Dimer", y = "Value")
+
+plot
+
+####End of edit
+
+
 # Preemptive alphabetizing of markercode containing numerals to work better with the Caret machine learning package. Caret cannot work with variable names containing numerals.
 dfTraining_ATprop$markercode <- ifelse(dfTraining_ATprop$markercode == "16S", "SixteenS", "EighteenS")
 dfValidation_ATprop$markercode <- ifelse(dfValidation_ATprop$markercode == "16S", "SixteenS", "EighteenS")
