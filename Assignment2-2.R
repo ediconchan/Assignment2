@@ -129,13 +129,30 @@ dfJoin <- dfJoin %>%
 
 dfJoin$nucleotides2 <- DNAStringSet(dfJoin$nucleotides2)
 
-# Removing gaps/Ns if they belong to the start or end of the sequence. Removing all occurrences of gaps in nucleotide sequences. Filter out the entries if they contain more than 10% N's in the sequence
+## EDIT: 10% Ns may be a high number since we want to optimize our sequence quality to train these models.  First I will could the number of sequences that contain >10% N's from the original script.
 dfJoinClassifier <- dfJoin %>%
   mutate(nucleotides2 = str_remove(nucleotides, "^[-N]+")) %>%
   mutate(nucleotides2 = str_remove(nucleotides2, "[-N]+$")) %>%
   mutate(nucleotides2 = str_remove_all(nucleotides2, "-+")) %>%
   filter(str_count(nucleotides2, "N") <= (0.1 * str_count(nucleotides)))
-  
+##Counting sequences
+nrow(dfJoinClassifier)
+
+##Changing filtering parameter to 0 to remove any sequences with an instance of N and recounting to ensure that the remaining sequences make up a substantive enough data size for the analysis.
+dfJoinClassifier <- dfJoin %>%
+  mutate(nucleotides2 = str_remove(nucleotides, "^[-N]+")) %>%
+  mutate(nucleotides2 = str_remove(nucleotides2, "[-N]+$")) %>%
+  mutate(nucleotides2 = str_remove_all(nucleotides2, "-+")) %>%
+  filter(str_count(nucleotides2, "N") <= (0.00 * str_count(nucleotides)))
+
+##Counting sequences
+nrow(dfJoinClassifier)
+dfJoinClassifier$nucleotides2 = DNAStringSet(dfJoinClassifier$nucleotides2)
+
+##We only lost 6 sequences containing Ns.  This allows us to have the highest quality sequence samples and maintain a good data size.
+
+##End of edit 
+
 dfJoinClassifier$nucleotides2 = DNAStringSet(dfJoinClassifier$nucleotides2)
 
 # Add frequency counts of each nucleotide base for each entry
