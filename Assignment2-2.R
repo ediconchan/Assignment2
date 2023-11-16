@@ -482,4 +482,31 @@ confusionMatrix(data = predictiondimer_nb, reference = factor(dfValidation_dimer
 predictionATprop_nb <- predict(modelATprop_nb, dfValidation_ATprop)
 confusionMatrix(data = predictionATprop_nb, reference = factor(dfValidation_ATprop$markercode))
 
-############################################################
+## Edit: I want to add a visualization to evaluate the efficiency of the trained ML models.  I added a ROC plot for 2 of the models.  The ROC plot gives you an AUC(area under curve) which is a value that when it is close to or equal to one it indicates that the model is high quality.
+
+# Define the training control for Caret algorithms ## ##EDIT: Changed trainControl method to CV and savePredictions to TRUE
+fitControl <- trainControl(
+  method = 'cv',                   
+  number = 25,                      
+  savePredictions = T,       
+  classProbs = T,                  
+  summaryFunction=twoClassSummary)
+
+#############
+##Package install to creat ROC plots
+install.packages("pROC")
+library(pROC)
+
+##Creating indices for creating ROC plot. 
+selectedIndicesRF <- modeldimer_rf$pred$mtry == 2
+selectedIndicesXGB <- modeldimer_xgb$pred$max_depth == 2
+
+##Plotting ROC plot, labeling and colouring.  Ensuring AUC(area under curve) is displayed so we can evaluate the efficiency of the model
+plot.rocRF <- plot.roc(modeldimer_rf$pred$obs[selectedIndicesRF], modeldimer_rf$pred$rowIndex[selectedIndicesRF], main = paste("ROC Plot Evaluating Trained Machine Learning Methods"), col = "lightblue", print.auc = TRUE)
+
+
+
+plot.rocXGB <- plot.roc(modeldimer_xgb$pred$obs[selectedIndicesXGB], modeldimer_xgb$pred$rowIndex[selectedIndicesXGB], main = paste("ROC Plot Evaluating Trained Machine Learning Methods"), col = "lightgreen", print.auc = TRUE)
+
+##End of edit
+###################################################################
