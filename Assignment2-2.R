@@ -1,3 +1,14 @@
+###########################################################
+# Code written by: Edicon Chan
+# Contributor: Cassandra Drazick
+#   ROC Curves, ggplot adaptation of caret bwplot, 
+#   sequence filtering changes 
+
+# Code and github reviewers: 
+# Cassandra Drazick, 
+# Nathaniel Lesperance, 
+# Cynthia Du
+
 ############################################################
 # SQUAMATA 18S rRNA AND MITOCHONDRIAL 16S rRNA GENE CLASSIFICATION WITH VARIOUS MACHINE LEARNING ALGORITHMS
 
