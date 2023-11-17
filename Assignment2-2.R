@@ -491,7 +491,7 @@ library(pROC)
 
 ##Creating indices for creating ROC plot. 
 selectedIndicesRF <- modeldimer_rf$pred$mtry == 2
-selectedIndicesXGB <- modeldimer_xgb$pred$max_depth == 2
+selectedIndicesXGB <- modeldimer_xgb$pred$max_depth == 1
 
 ##Plotting ROC plot, labeling and colouring.  Ensuring AUC(area under curve) is displayed so we can evaluate the efficiency of the model
 plot.rocRF <- plot.roc(modeldimer_rf$pred$obs[selectedIndicesRF], modeldimer_rf$pred$rowIndex[selectedIndicesRF], main = paste("ROC Plot Evaluating Trained Machine Learning Methods"), col = "lightblue", print.auc = TRUE)
