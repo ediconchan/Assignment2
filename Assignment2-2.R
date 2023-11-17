@@ -140,7 +140,6 @@ dfJoin <- dfJoin %>%
 
 dfJoin$nucleotides2 <- DNAStringSet(dfJoin$nucleotides2)
 
-## EDIT: 10% Ns may be a high number since we want to optimize our sequence quality to train these models.  First I will could the number of sequences that contain >10% N's from the original script.
 ##Changing filtering parameter to 0 to remove any sequences with an instance of N and recounting to ensure that the remaining sequences make up a substantive enough data size for the analysis.
 dfJoinClassifier <- dfJoin %>%
   mutate(nucleotides2 = str_remove(nucleotides, "^[-N]+")) %>%
@@ -196,10 +195,11 @@ dfJoinClassifier$nucleotides2 <- as.character(dfJoinClassifier$nucleotides2)
 #Seeing counts by markercode
 table(dfJoinClassifier$markercode)
 
-# Determining how much samples to use for the validation set based on 25% of the lowest sampled gene in the dataframe 
+# Determining how many samples to use for the validation set based on 25% of the lowest sampled gene in the dataframe 
 validation_num <- table(dfJoinClassifier$markercode)
 validation_num <- min(validation_num)*0.25
 validation_num <- floor(validation_num)
+
 # The amount of samples in the training set will then be the difference between the total and the validation sample size
 training_num <- table(dfJoinClassifier$markercode)
 training_num <- min(training_num) - validation_num
@@ -505,7 +505,7 @@ selectedIndicesRF <- modeldimer_rf$pred$mtry == 2
 selectedIndicesXGB <- modeldimer_xgb$pred$max_depth == 1
 
 ##Plotting ROC plot, labeling and colouring.  Ensuring AUC(area under curve) is displayed so we can evaluate the efficiency of the model
-plot.rocRF <- plot.roc(modeldimer_rf$pred$obs[selectedIndicesRF], modeldimer_rf$pred$rowIndex[selectedIndicesRF], main = paste("ROC Plot Evaluating Trained Machine Learning Methods"), col = "lightblue", print.auc = TRUE)
+plot.rocRF <- plot.roc(modeldimer_rf$pred$obs[selectedIndicesRF], modeldimer_rf$pred$rowIndex[selectedIndicesRF], main = paste("ROC Plot Evaluating Trained Random Forest Machine Learning Methods"), col = "red", print.auc = TRUE)
 
 
 
