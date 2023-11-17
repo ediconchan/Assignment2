@@ -203,10 +203,11 @@ dfJoinClassifier$nucleotides2 <- as.character(dfJoinClassifier$nucleotides2)
 #Seeing counts by markercode
 table(dfJoinClassifier$markercode)
 
-# Determining how much samples to use for the validation set based on 25% of the lowest sampled gene in the dataframe 
+# Determining how many samples to use for the validation set based on 25% of the lowest sampled gene in the dataframe 
 validation_num <- table(dfJoinClassifier$markercode)
 validation_num <- min(validation_num)*0.25
 validation_num <- floor(validation_num)
+
 # The amount of samples in the training set will then be the difference between the total and the validation sample size
 training_num <- table(dfJoinClassifier$markercode)
 training_num <- min(training_num) - validation_num
@@ -512,7 +513,7 @@ selectedIndicesRF <- modeldimer_rf$pred$mtry == 2
 selectedIndicesXGB <- modeldimer_xgb$pred$max_depth == 2
 
 ##Plotting ROC plot, labeling and colouring.  Ensuring AUC(area under curve) is displayed so we can evaluate the efficiency of the model
-plot.rocRF <- plot.roc(modeldimer_rf$pred$obs[selectedIndicesRF], modeldimer_rf$pred$rowIndex[selectedIndicesRF], main = paste("ROC Plot Evaluating Trained Machine Learning Methods"), col = "lightblue", print.auc = TRUE)
+plot.rocRF <- plot.roc(modeldimer_rf$pred$obs[selectedIndicesRF], modeldimer_rf$pred$rowIndex[selectedIndicesRF], main = paste("ROC Plot Evaluating Trained Random Forest Machine Learning Methods"), col = "red", print.auc = TRUE)
 
 
 
