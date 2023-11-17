@@ -130,20 +130,12 @@ dfJoin <- dfJoin %>%
 dfJoin$nucleotides2 <- DNAStringSet(dfJoin$nucleotides2)
 
 ## EDIT: 10% Ns may be a high number since we want to optimize our sequence quality to train these models.  First I will could the number of sequences that contain >10% N's from the original script.
-dfJoinClassifier <- dfJoin %>%
-  mutate(nucleotides2 = str_remove(nucleotides, "^[-N]+")) %>%
-  mutate(nucleotides2 = str_remove(nucleotides2, "[-N]+$")) %>%
-  mutate(nucleotides2 = str_remove_all(nucleotides2, "-+")) %>%
-  filter(str_count(nucleotides2, "N") <= (0.1 * str_count(nucleotides)))
-##Counting sequences
-nrow(dfJoinClassifier)
-
 ##Changing filtering parameter to 0 to remove any sequences with an instance of N and recounting to ensure that the remaining sequences make up a substantive enough data size for the analysis.
 dfJoinClassifier <- dfJoin %>%
   mutate(nucleotides2 = str_remove(nucleotides, "^[-N]+")) %>%
   mutate(nucleotides2 = str_remove(nucleotides2, "[-N]+$")) %>%
   mutate(nucleotides2 = str_remove_all(nucleotides2, "-+")) %>%
-  filter(str_count(nucleotides2, "N") <= (0.00 * str_count(nucleotides)))
+  filter(str_count(nucleotides2, "N") == 0)
 
 ##Counting sequences
 nrow(dfJoinClassifier)
