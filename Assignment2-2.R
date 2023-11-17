@@ -1,3 +1,14 @@
+###########################################################
+# Code written by: Edicon Chan
+# Contributor: Cassandra Drazick
+#   ROC Curves, ggplot adaptation of caret bwplot, 
+#   sequence filtering changes 
+
+# Code and github reviewers: 
+# Cassandra Drazick, 
+# Nathaniel Lesperance, 
+# Cynthia Du
+
 ############################################################
 # SQUAMATA 18S rRNA AND MITOCHONDRIAL 16S rRNA GENE CLASSIFICATION WITH VARIOUS MACHINE LEARNING ALGORITHMS
 
@@ -129,31 +140,12 @@ dfJoin <- dfJoin %>%
 
 dfJoin$nucleotides2 <- DNAStringSet(dfJoin$nucleotides2)
 
-## EDIT: 10% Ns may be a high number since we want to optimize our sequence quality to train these models.  First I will could the number of sequences that contain >10% N's from the original script.
-dfJoinClassifier <- dfJoin %>%
-  mutate(nucleotides2 = str_remove(nucleotides, "^[-N]+")) %>%
-  mutate(nucleotides2 = str_remove(nucleotides2, "[-N]+$")) %>%
-  mutate(nucleotides2 = str_remove_all(nucleotides2, "-+")) %>%
-  filter(str_count(nucleotides2, "N") <= (0.1 * str_count(nucleotides)))
-##Counting sequences
-nrow(dfJoinClassifier)
-
-##Changing filtering parameter to 0.05 (5%) to remove any sequences with >5% instances of N and recounting to ensure that the remaining sequences make up a substantive enough data size for the analysis.
-dfJoinClassifier <- dfJoin %>%
-  mutate(nucleotides2 = str_remove(nucleotides, "^[-N]+")) %>%
-  mutate(nucleotides2 = str_remove(nucleotides2, "[-N]+$")) %>%
-  mutate(nucleotides2 = str_remove_all(nucleotides2, "-+")) %>%
-  filter(str_count(nucleotides2, "N") <= (0.05 * str_count(nucleotides)))
-
-#Counting sequences
-nrow(dfJoinClassifier)
-
 ##Changing filtering parameter to 0 to remove any sequences with an instance of N and recounting to ensure that the remaining sequences make up a substantive enough data size for the analysis.
 dfJoinClassifier <- dfJoin %>%
   mutate(nucleotides2 = str_remove(nucleotides, "^[-N]+")) %>%
   mutate(nucleotides2 = str_remove(nucleotides2, "[-N]+$")) %>%
   mutate(nucleotides2 = str_remove_all(nucleotides2, "-+")) %>%
-  filter(str_count(nucleotides2, "N") <= (0.00 * str_count(nucleotides)))
+  filter(str_count(nucleotides2, "N") == 0)
 
 ##Counting sequences
 nrow(dfJoinClassifier)
@@ -510,7 +502,7 @@ library(pROC)
 
 ##Creating indices for creating ROC plot. 
 selectedIndicesRF <- modeldimer_rf$pred$mtry == 2
-selectedIndicesXGB <- modeldimer_xgb$pred$max_depth == 2
+selectedIndicesXGB <- modeldimer_xgb$pred$max_depth == 1
 
 ##Plotting ROC plot, labeling and colouring.  Ensuring AUC(area under curve) is displayed so we can evaluate the efficiency of the model
 plot.rocRF <- plot.roc(modeldimer_rf$pred$obs[selectedIndicesRF], modeldimer_rf$pred$rowIndex[selectedIndicesRF], main = paste("ROC Plot Evaluating Trained Random Forest Machine Learning Methods"), col = "red", print.auc = TRUE)
