@@ -129,13 +129,30 @@ dfJoin <- dfJoin %>%
 
 dfJoin$nucleotides2 <- DNAStringSet(dfJoin$nucleotides2)
 
-# Removing gaps/Ns if they belong to the start or end of the sequence. Removing all occurrences of gaps in nucleotide sequences. Filter out the entries if they contain more than 10% N's in the sequence
+## EDIT: 10% Ns may be a high number since we want to optimize our sequence quality to train these models.  First I will could the number of sequences that contain >10% N's from the original script.
 dfJoinClassifier <- dfJoin %>%
   mutate(nucleotides2 = str_remove(nucleotides, "^[-N]+")) %>%
   mutate(nucleotides2 = str_remove(nucleotides2, "[-N]+$")) %>%
   mutate(nucleotides2 = str_remove_all(nucleotides2, "-+")) %>%
   filter(str_count(nucleotides2, "N") <= (0.1 * str_count(nucleotides)))
-  
+##Counting sequences
+nrow(dfJoinClassifier)
+
+##Changing filtering parameter to 0 to remove any sequences with an instance of N and recounting to ensure that the remaining sequences make up a substantive enough data size for the analysis.
+dfJoinClassifier <- dfJoin %>%
+  mutate(nucleotides2 = str_remove(nucleotides, "^[-N]+")) %>%
+  mutate(nucleotides2 = str_remove(nucleotides2, "[-N]+$")) %>%
+  mutate(nucleotides2 = str_remove_all(nucleotides2, "-+")) %>%
+  filter(str_count(nucleotides2, "N") <= (0.00 * str_count(nucleotides)))
+
+##Counting sequences
+nrow(dfJoinClassifier)
+dfJoinClassifier$nucleotides2 = DNAStringSet(dfJoinClassifier$nucleotides2)
+
+##We only lost 6 sequences containing Ns.  This allows us to have the highest quality sequence samples and maintain a good data size.
+
+##End of edit 
+
 dfJoinClassifier$nucleotides2 = DNAStringSet(dfJoinClassifier$nucleotides2)
 
 # Add frequency counts of each nucleotide base for each entry
@@ -231,6 +248,24 @@ featurePlot(x = dfDimer_norm[,2:17], y = factor(dfDimer_norm$markercode), plot =
 preProcess_ATGprop <- preProcess(dfTraining[,c("Aprop","Tprop", "Gprop")], method = "range")
 dfATprop_norm <- predict(preProcess_ATGprop, newdata = dfTraining)
 featurePlot(x= dfATprop_norm[,c("Aprop","Tprop", "Gprop")], y = factor(dfTraining_ATprop$markercode), plot = "box", labels = c("",""))
+
+
+## EDIT: I want to improve this box-whisker plot, add labels and make the colouring of the plot more accessible. 
+
+##Adding package to manipulate data frame to make plotting easier
+library(reshape2)
+library(viridis)
+
+## "Melting" data frame into long-format data to be able to access the x and y variables easier
+dfMeltDimer <- melt(dfDimer_norm, id.vars = ("markercode"))
+
+##plotting using melted variables, adding colour and labels, making viewing and reading the plot easier
+plot <- ggplot(data = dfMeltDimer, aes(x= markercode, y = value)) + geom_boxplot(aes(fill= markercode)) +theme_bw() + facet_wrap(~ variable, scales = "free") + geom_point(aes(y=value, group=markercode), position = position_dodge(0.9)) + scale_fill_viridis_d(option = "D", direction = -1) + labs(title = "Importance of Predictor Dimers", x= "Dimer", y = "Value")
+
+plot
+
+####End of edit
+
 
 # Preemptive alphabetizing of markercode containing numerals to work better with the Caret machine learning package. Caret cannot work with variable names containing numerals.
 dfTraining_ATprop$markercode <- ifelse(dfTraining_ATprop$markercode == "16S", "SixteenS", "EighteenS")
@@ -447,4 +482,31 @@ confusionMatrix(data = predictiondimer_nb, reference = factor(dfValidation_dimer
 predictionATprop_nb <- predict(modelATprop_nb, dfValidation_ATprop)
 confusionMatrix(data = predictionATprop_nb, reference = factor(dfValidation_ATprop$markercode))
 
-############################################################
+## Edit: I want to add a visualization to evaluate the efficiency of the trained ML models.  I added a ROC plot for 2 of the models.  The ROC plot gives you an AUC(area under curve) which is a value that when it is close to or equal to one it indicates that the model is high quality.
+
+# Define the training control for Caret algorithms ## ##EDIT: Changed trainControl method to CV and savePredictions to TRUE
+fitControl <- trainControl(
+  method = 'cv',                   
+  number = 25,                      
+  savePredictions = T,       
+  classProbs = T,                  
+  summaryFunction=twoClassSummary)
+
+#############
+##Package install to creat ROC plots
+install.packages("pROC")
+library(pROC)
+
+##Creating indices for creating ROC plot. 
+selectedIndicesRF <- modeldimer_rf$pred$mtry == 2
+selectedIndicesXGB <- modeldimer_xgb$pred$max_depth == 2
+
+##Plotting ROC plot, labeling and colouring.  Ensuring AUC(area under curve) is displayed so we can evaluate the efficiency of the model
+plot.rocRF <- plot.roc(modeldimer_rf$pred$obs[selectedIndicesRF], modeldimer_rf$pred$rowIndex[selectedIndicesRF], main = paste("ROC Plot Evaluating Trained Machine Learning Methods"), col = "lightblue", print.auc = TRUE)
+
+
+
+plot.rocXGB <- plot.roc(modeldimer_xgb$pred$obs[selectedIndicesXGB], modeldimer_xgb$pred$rowIndex[selectedIndicesXGB], main = paste("ROC Plot Evaluating Trained Machine Learning Methods"), col = "lightgreen", print.auc = TRUE)
+
+##End of edit
+###################################################################
