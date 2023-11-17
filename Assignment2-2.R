@@ -138,6 +138,16 @@ dfJoinClassifier <- dfJoin %>%
 ##Counting sequences
 nrow(dfJoinClassifier)
 
+##Changing filtering parameter to 0.05 (5%) to remove any sequences with >5% instances of N and recounting to ensure that the remaining sequences make up a substantive enough data size for the analysis.
+dfJoinClassifier <- dfJoin %>%
+  mutate(nucleotides2 = str_remove(nucleotides, "^[-N]+")) %>%
+  mutate(nucleotides2 = str_remove(nucleotides2, "[-N]+$")) %>%
+  mutate(nucleotides2 = str_remove_all(nucleotides2, "-+")) %>%
+  filter(str_count(nucleotides2, "N") <= (0.05 * str_count(nucleotides)))
+
+#Counting sequences
+nrow(dfJoinClassifier)
+
 ##Changing filtering parameter to 0 to remove any sequences with an instance of N and recounting to ensure that the remaining sequences make up a substantive enough data size for the analysis.
 dfJoinClassifier <- dfJoin %>%
   mutate(nucleotides2 = str_remove(nucleotides, "^[-N]+")) %>%
